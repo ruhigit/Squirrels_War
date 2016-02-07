@@ -1,6 +1,47 @@
 
 import sys
 
+def GreedyBestfirstSearch(my_player,board,players):
+
+	#total values of both players
+	total_value_x,total_value_o=total_value(players,board)
+	if my_player=='X':
+		total_value_player=total_value_x
+		total_value_opponent=total_value_o
+	else:
+		total_value_player=total_value_o
+		total_value_opponent=total_value_x
+
+	#evaluate each square
+	max_value=0
+	max_row=0
+	max_col=0
+
+	for row in range(0,5,1):
+		for col in range(0,5,1):
+
+			if(players[row][col]=='*'):
+				temp_value_player,temp_value_opponent=check_square(my_player,board,players,row,col)
+				#E(s) = Total_Value_Player - Total_Value_Opponent
+				curr_value=(total_value_player+temp_value_player)-(total_value_opponent+temp_value_opponent)
+
+			if curr_value>max_value:
+				max_value=curr_value
+				max_row=row
+				max_col=col
+
+			elif curr_value == max_value:
+				max_row,max_col=tie_breaker(row,col,max_row,max_col);
+
+	return (max_row,max_col)
+
+
+def minimax(my_player,cut_off_depth,board,players):
+	return
+
+def alpha_beta_pruning(my_player,cut_off_depth,board,players):
+	return
+
 # Check if square can be raided or sneaked
 def check_square(my_player,board,players,curr_row,curr_col):
 
@@ -104,40 +145,8 @@ def tie_breaker(row1,col1,row2,col2):
 	else:
 		return (row2,col2)
 
-#E(s) = Total_Value_Player - Total_Value_Opponent
-def GreedyBestfirstSearch(my_player,board,players):
 
-	#total values of both players
-	total_value_x,total_value_o=total_value(players,board)
-	if my_player=='X':
-		total_value_player=total_value_x
-		total_value_opponent=total_value_o
-	else:
-		total_value_player=total_value_o
-		total_value_opponent=total_value_x
 
-	#evaluate each square
-	max_value=0
-	max_row=0
-	max_col=0
-
-	for row in range(0,5,1):
-		print(row)
-		for col in range(0,5,1):
-
-			if(players[row][col]=='*'):
-				temp_value_player,temp_value_opponent=check_square(my_player,board,players,row,col)
-				curr_value=(total_value_player+temp_value_player)-(total_value_opponent+temp_value_opponent)
-
-			if curr_value>max_value:
-				max_value=curr_value
-				max_row=row
-				max_col=col
-
-			elif curr_value == max_value:
-				max_row,max_col=tie_breaker(row,col,max_row,max_col);
-
-	return (max_row,max_col)
 
 #decode the input file for part1
 def decode_input_part1(inputFile):
@@ -194,6 +203,12 @@ def main():
 		my_player,cut_off_depth,board,players=decode_input_part1(inputFile);
 		if task_number==1:
 			next_row,next_col=GreedyBestfirstSearch(my_player,board,players)
+			players[next_row][next_col]=my_player
+		elif task_number==2:
+			next_row,next_col=minimax(my_player,cut_off_depth,board,players)
+			players[next_row][next_col]=my_player
+		elif task_number==3:
+			next_row,next_col=alpha_beta_pruning(my_player,cut_off_depth,board,players)
 			players[next_row][next_col]=my_player
 	else:  #part2
 		decode_input_part2(inputFile);
