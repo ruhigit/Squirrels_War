@@ -7,24 +7,24 @@ def check_square(my_player,board,players,curr_row,curr_col):
 	#check for existing pieces horizontally and vertically
 
 	#left horizontal
-	if(curr_col-1>0):
+	if(curr_col-1>=0):
 		if(my_player==players[curr_row][curr_col-1]):
 			temp_value_player,temp_value_opponent=raid(my_player,board,players,curr_row,curr_col)
 			return temp_value_player,temp_value_opponent
 	#right horizontal
-	if(curr_col+1<4):
+	if(curr_col+1<=4):
 		if(my_player==players[curr_row][curr_col+1]):
 			temp_value_player,temp_value_opponent=raid(my_player,board,players,curr_row,curr_col)
 			return temp_value_player,temp_value_opponent
 
 	#up vertical
-	if(curr_row-1>0):
+	if(curr_row-1>=0):
 		if(my_player==players[curr_row-1][curr_col]):
 			temp_value_player,temp_value_opponent=raid(my_player,board,players,curr_row,curr_col)
 			return temp_value_player,temp_value_opponent
 
 	#down vertical
-	if(curr_row+1<4):
+	if(curr_row+1<=4):
 		if(my_player==players[curr_row+1][curr_col]):
 			temp_value_player,temp_value_opponent=raid(my_player,board,players,curr_row,curr_col)
 			return temp_value_player,temp_value_opponent
@@ -51,27 +51,27 @@ def raid(my_player,board,players,curr_row,curr_col):
 	#any enemy pieces adjacent to the target square are turned to the players side.
 
 	#left horizontal
-	if(curr_col-1>0):
+	if(curr_col-1>=0):
 		if(opponent==players[curr_row][curr_col-1]):
 			temp_value_player+=board[curr_row][curr_col-1]
 			temp_value_opponent-=board[curr_row][curr_col-1]
 			
 	#right horizontal
-	if(curr_col+1<4):
+	if(curr_col+1<=4):
 		if(opponent==players[curr_row][curr_col+1]):
 			temp_value_player+=board[curr_row][curr_col+1]
 			temp_value_opponent-=board[curr_row][curr_col+1]
 			
 
 	#up vertical
-	if(curr_row-1>0):
+	if(curr_row-1>=0):
 		if(opponent==players[curr_row-1][curr_col]):
 			temp_value_player+=board[curr_row-1][curr_col]
 			temp_value_opponent-=board[curr_row-1][curr_col]
 			
 
 	#down vertical
-	if(curr_row+1<4):
+	if(curr_row+1<=4):
 		if(opponent==players[curr_row+1][curr_col]):
 			temp_value_player+=board[curr_row+1][curr_col]
 			temp_value_opponent-=board[curr_row+1][curr_col]
@@ -82,9 +82,9 @@ def raid(my_player,board,players,curr_row,curr_col):
 def total_value(players,board):
 	total_value_x=0;
 	total_value_o=0;
-	for row in range(0,4,1):
+	for row in range(0,5,1):
 
-		for col in range(0,4,1):
+		for col in range(0,5,1):
 
 			if(players[row][col]=='X'):
 				total_value_x+=board[row][col]
@@ -121,9 +121,9 @@ def GreedyBestfirstSearch(my_player,board,players):
 	max_row=0
 	max_col=0
 
-	for row in range(0,4,1):
-
-		for col in range(0,4,1):
+	for row in range(0,5,1):
+		print(row)
+		for col in range(0,5,1):
 
 			if(players[row][col]=='*'):
 				temp_value_player,temp_value_opponent=check_square(my_player,board,players,row,col)
@@ -194,11 +194,17 @@ def main():
 		my_player,cut_off_depth,board,players=decode_input_part1(inputFile);
 		if task_number==1:
 			next_row,next_col=GreedyBestfirstSearch(my_player,board,players)
-			print(next_row,next_col)
+			players[next_row][next_col]=my_player
 	else:  #part2
 		decode_input_part2(inputFile);
 	
 
+	#create output file
+	with open('next_state.txt', 'w') as op_file:
+		for row in range(0,5,1):
+			for col in range(0,5,1):
+				op_file.write(players[row][col])
+			op_file.write("\n")
 	return
 
 if __name__=="__main__":
