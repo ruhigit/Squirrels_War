@@ -61,7 +61,7 @@ def minimaxalgo(op_file,curr_row,curr_col,depth,cut_off_depth,maximizingPlayer,m
 
 		bestValue=(total_value_player)-(total_value_opponent)
 		print_in_file(curr_row,curr_col,depth,bestValue,op_file)
-		return bestValue
+		return bestValue,curr_row,curr_col
 
 	#MAX
 	if maximizingPlayer:
@@ -73,9 +73,16 @@ def minimaxalgo(op_file,curr_row,curr_col,depth,cut_off_depth,maximizingPlayer,m
 					players[row][col]=my_player
 					#call for child nodes
 					print_in_file(curr_row,curr_col,depth,bestValue,op_file)
-					temp_value_player,temp_value_opponent=check_square(my_player,board,players,row,col)
-					value=minimaxalgo(op_file,row,col,depth+1,cut_off_depth,0,my_player,my_opponent,board,players,total_value_player+temp_value_player,total_value_opponent+temp_value_opponent)
+					temp_value_player,temp_value_opponent,myplayers=check_square(my_player,board,players,row,col)
+					it=iter(myplayers)
+					for position in it:	
+						players[position][next(it)]=my_player
+
+					value,finalrow,finalcol=minimaxalgo(op_file,row,col,depth+1,cut_off_depth,0,my_player,my_opponent,board,players,total_value_player+temp_value_player,total_value_opponent+temp_value_opponent)
 					players[row][col]='*'
+					it=iter(myplayers)
+					for position in it:	
+						players[position][next(it)]=my_opponent
 					#print if not leaf node
 					if(depth+1!=cut_off_depth):
 						print_in_file(row,col,depth+1,value,op_file)
@@ -85,7 +92,7 @@ def minimaxalgo(op_file,curr_row,curr_col,depth,cut_off_depth,maximizingPlayer,m
 						max_col=col
 					elif value == bestValue:
 						max_row,max_col=tie_breaker(row,col,max_row,max_col)
-		return (bestValue)
+		return (bestValue,max_row,max_col)
 
 	#MIN	
 	else:
@@ -98,9 +105,16 @@ def minimaxalgo(op_file,curr_row,curr_col,depth,cut_off_depth,maximizingPlayer,m
 					#call for child nodes
 					# ------------------ print --------------------------------
 					print_in_file(curr_row,curr_col,depth,bestValue,op_file)
-					temp_value_opponent,temp_value_player=check_square(my_opponent,board,players,row,col)
-					value=minimaxalgo(op_file,row,col,depth+1,cut_off_depth,1,my_player,my_opponent,board,players,total_value_player+temp_value_player,total_value_opponent+temp_value_opponent)
+					temp_value_opponent,temp_value_player,myplayers=check_square(my_opponent,board,players,row,col)
+					it=iter(myplayers)
+					for position in it:	
+						players[position][next(it)]=my_opponent
+
+					value,finalrow,finalcol=minimaxalgo(op_file,row,col,depth+1,cut_off_depth,1,my_player,my_opponent,board,players,total_value_player+temp_value_player,total_value_opponent+temp_value_opponent)
 					players[row][col]='*'
+					it=iter(myplayers)
+					for position in it:	
+						players[position][next(it)]=my_player
 					#print if not leaf node
 					if(depth+1!=cut_off_depth):
 						print_in_file(row,col,depth+1,value,op_file)
@@ -109,9 +123,8 @@ def minimaxalgo(op_file,curr_row,curr_col,depth,cut_off_depth,maximizingPlayer,m
 						max_row=row
 						max_col=col
 					elif value == bestValue:
-						max_row,max_col=tie_breaker(row,col,max_row,max_col)
-					
-		return bestValue
+						max_row,max_col=tie_breaker(row,col,max_row,max_col)	
+		return bestValue,max_row,max_col
 
 
 
@@ -135,9 +148,7 @@ def minimax(my_player,cut_off_depth,board,players):
 	maximizingPlayer=1
 	row=-1
 	col=-1
-	max_row=1
-	max_col=1
-	bestValue=minimaxalgo(op_file,row,col,0,cut_off_depth,maximizingPlayer,my_player,my_opponent,board,players,total_value_player,total_value_opponent)
+	bestValue,max_row,max_col=minimaxalgo(op_file,row,col,0,cut_off_depth,maximizingPlayer,my_player,my_opponent,board,players,total_value_player,total_value_opponent)
 	op_file.write("root,0,"+str(bestValue))
 	op_file.close()
 	return(max_row,max_col)
@@ -149,39 +160,40 @@ def alpha_beta_pruning(my_player,cut_off_depth,board,players):
 def check_square(my_player,board,players,curr_row,curr_col):
 
 	#check for existing pieces horizontally and vertically
-
+	myplayers=list()
 	#left horizontal
 	if(curr_col-1>=0):
 		if(my_player==players[curr_row][curr_col-1]):
-			temp_value_player,temp_value_opponent=raid(my_player,board,players,curr_row,curr_col)
-			return temp_value_player,temp_value_opponent
+			temp_value_player,temp_value_opponent,myplayers=raid(my_player,board,players,curr_row,curr_col)
+			return temp_value_player,temp_value_opponent,myplayers
 	#right horizontal
 	if(curr_col+1<=4):
 		if(my_player==players[curr_row][curr_col+1]):
-			temp_value_player,temp_value_opponent=raid(my_player,board,players,curr_row,curr_col)
-			return temp_value_player,temp_value_opponent
+			temp_value_player,temp_value_opponent,myplayers=raid(my_player,board,players,curr_row,curr_col)
+			return temp_value_player,temp_value_opponent,myplayers
 
 	#up vertical
 	if(curr_row-1>=0):
 		if(my_player==players[curr_row-1][curr_col]):
-			temp_value_player,temp_value_opponent=raid(my_player,board,players,curr_row,curr_col)
-			return temp_value_player,temp_value_opponent
+			temp_value_player,temp_value_opponent,myplayers=raid(my_player,board,players,curr_row,curr_col)
+			return temp_value_player,temp_value_opponent,myplayers
 
 	#down vertical
 	if(curr_row+1<=4):
 		if(my_player==players[curr_row+1][curr_col]):
-			temp_value_player,temp_value_opponent=raid(my_player,board,players,curr_row,curr_col)
-			return temp_value_player,temp_value_opponent
+			temp_value_player,temp_value_opponent,myplayers=raid(my_player,board,players,curr_row,curr_col)
+			return temp_value_player,temp_value_opponent,myplayers
 
 	#else Sneak
 	temp_value_player=board[curr_row][curr_col]
 	temp_value_opponent=0
-	return temp_value_player,temp_value_opponent
+	return temp_value_player,temp_value_opponent,myplayers
 
 
 
 def raid(my_player,board,players,curr_row,curr_col):
 
+	myplayers=list()
 	if my_player=='X':
 		opponent='O'
 	else:
@@ -197,12 +209,16 @@ def raid(my_player,board,players,curr_row,curr_col):
 	#left horizontal
 	if(curr_col-1>=0):
 		if(opponent==players[curr_row][curr_col-1]):
+			myplayers.append(curr_row)
+			myplayers.append(curr_col-1)
 			temp_value_player+=board[curr_row][curr_col-1]
 			temp_value_opponent-=board[curr_row][curr_col-1]
 			
 	#right horizontal
 	if(curr_col+1<=4):
 		if(opponent==players[curr_row][curr_col+1]):
+			myplayers.append(curr_row)
+			myplayers.append(curr_col+1)
 			temp_value_player+=board[curr_row][curr_col+1]
 			temp_value_opponent-=board[curr_row][curr_col+1]
 			
@@ -210,6 +226,8 @@ def raid(my_player,board,players,curr_row,curr_col):
 	#up vertical
 	if(curr_row-1>=0):
 		if(opponent==players[curr_row-1][curr_col]):
+			myplayers.append(curr_row-1)
+			myplayers.append(curr_col)
 			temp_value_player+=board[curr_row-1][curr_col]
 			temp_value_opponent-=board[curr_row-1][curr_col]
 			
@@ -217,10 +235,12 @@ def raid(my_player,board,players,curr_row,curr_col):
 	#down vertical
 	if(curr_row+1<=4):
 		if(opponent==players[curr_row+1][curr_col]):
+			myplayers.append(curr_row+1)
+			myplayers.append(curr_col)
 			temp_value_player+=board[curr_row+1][curr_col]
 			temp_value_opponent-=board[curr_row+1][curr_col]
 
-	return (temp_value_player,temp_value_opponent)
+	return (temp_value_player,temp_value_opponent,myplayers)
 
 
 def total_value(players,board):
@@ -290,6 +310,40 @@ def decode_input_part2(inputFile):
 	
 	return
 
+
+def check_allPlayers(curr_row,curr_col,my_player,players):
+	myplayers=list()
+	if my_player=='X':
+		opponent='O'
+	else:
+		opponent='X'
+
+	#left horizontal
+	if(curr_col-1>=0):
+		if(opponent==players[curr_row][curr_col-1]):
+			myplayers.append(curr_row)
+			myplayers.append(curr_col-1)
+			
+	#right horizontal
+	if(curr_col+1<=4):
+		if(opponent==players[curr_row][curr_col+1]):
+			myplayers.append(curr_row)
+			myplayers.append(curr_col+1)
+
+	#up vertical
+	if(curr_row-1>=0):
+		if(opponent==players[curr_row-1][curr_col]):
+			myplayers.append(curr_row-1)
+			myplayers.append(curr_col)
+			
+
+	#down vertical
+	if(curr_row+1<=4):
+		if(opponent==players[curr_row+1][curr_col]):
+			myplayers.append(curr_row+1)
+			myplayers.append(curr_col)
+	return myplayers
+
 def main():
 	
 	
@@ -317,12 +371,17 @@ def main():
 		decode_input_part2(inputFile);
 	
 
+	playerlist=check_allPlayers(next_row,next_col,my_player,players)
+	it=iter(playerlist)
+	for position in it:	
+		players[position][next(it)]=my_player
 	#create output file
 	with open('next_state.txt', 'w') as op_file:
 		for row in range(0,5,1):
 			for col in range(0,5,1):
 				op_file.write(players[row][col])
-			op_file.write("\n")
+			if(row!=4 or col!=4):
+				op_file.write("\n")
 	return
 
 if __name__=="__main__":
